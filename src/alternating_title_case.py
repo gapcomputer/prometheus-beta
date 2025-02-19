@@ -17,7 +17,7 @@ def alternating_title_case(input_string):
     if not isinstance(input_string, str):
         raise TypeError("Input must be a string")
     
-    words = input_string.lower().split()
+    words = input_string.split()
     alternating_words = []
     
     for i, word in enumerate(words):
@@ -25,10 +25,10 @@ def alternating_title_case(input_string):
             # Even index words (0, 2, 4...) are title case
             alternating_words.append(word.title())
         else:
-            # Odd index words (1, 3, 5...) alternate case
-            chars = list(word)
-            for j in range(len(chars)):
-                chars[j] = chars[j].upper() if j % 2 == 1 else chars[j].lower()
+            # Odd index words (1, 3, 5...) alternate case manually
+            chars = list(word.lower())
+            for j in range(1, len(chars), 2):
+                chars[j] = chars[j].upper()
             alternating_words.append(''.join(chars))
     
     return ' '.join(alternating_words)
