@@ -10,7 +10,9 @@ def test_single_word():
     assert alternating_title_case("world") == 'World'
 
 def test_multiple_words():
-    assert alternating_title_case("one two three four") == 'One tWo tHrEe fOuR'
+    # Carefully check each word's case transformation
+    result = alternating_title_case("one two three four")
+    assert result == 'One tWo tHrEe fOuR'
 
 def test_edge_cases():
     # Empty string
