@@ -27,8 +27,8 @@ def alternating_title_case(input_string):
         else:
             # Odd index words (1, 3, 5...) have specific alternating case
             chars = list(word.lower())
-            for j in range(len(chars)):
-                chars[j] = chars[j].upper() if j % 2 == 1 else chars[j]
+            for j in range(1, len(chars), 2):
+                chars[j] = chars[j].upper()
             alternating_words.append(''.join(chars))
     
     return ' '.join(alternating_words)
