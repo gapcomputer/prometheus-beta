@@ -29,8 +29,7 @@ def compress(input_data):
     
     # Initialize compression structures
     compressed = bytearray()
-    window = {}
-    current_code = 256  # Start after standard ASCII
+    window_size = 4096
     
     # Add control flag for tracking compression type
     compressed.append(0)  # 0 indicates compression used
@@ -42,10 +41,12 @@ def compress(input_data):
         longest_match_length = 0
         longest_match_offset = 0
         
-        for match_start in range(max(0, start - 4096), start):
+        # Search backwards in the sliding window
+        window_start = max(0, start - window_size)
+        for match_start in range(window_start, start):
             match_length = 0
             while (start + match_length < len(input_data) and 
-                   match_length < 15 and  # Limit match length
+                   match_length < 15 and  # Limit match length 
                    input_data[match_start + match_length] == input_data[start + match_length]):
                 match_length += 1
             
@@ -97,25 +98,36 @@ def decompress(compressed_data):
     pos = 1  # Start after control flag
     
     while pos < len(compressed_data):
-        # Check if literal or match
+        # Get the token
         token = compressed_data[pos]
         pos += 1
         
-        # If highest bit is 0, it's a literal
-        if token < 16:
+        # Check if it's a match or literal
+        if token >= 16:
+            # Literal byte
+            decompressed.append(token)
+        else:
             # Match token: 4 bits offset, 4 bits length
             match_offset = token >> 4
             match_length = token & 0xF
             
+            # If zero match_offset, it's an invalid token
+            if match_offset == 0:
+                break
+            
             # Find match start in decompressed data
             match_start = len(decompressed) - match_offset
             
+            # Prevent index out of range
+            if match_start < 0:
+                break
+            
             # Copy matched sequence
             for _ in range(match_length):
-                decompressed.append(decompressed[match_start])
+                if match_start >= len(decompressed):
+                    break
+                byte_to_copy = decompressed[match_start]
+                decompressed.append(byte_to_copy)
                 match_start += 1
-        else:
-            # Literal byte
-            decompressed.append(token)
     
     return decompressed
