@@ -37,7 +37,11 @@ def to_constant_case(input_string: str) -> str:
     # Split by camel case (insert space before capital letters)
     chars = []
     for i, char in enumerate(result):
-        if i > 0 and char.isupper() and result[i-1].islower():
+        # Add space before uppercase letters, with special handling for consecutive uppercase
+        if (i > 0 and 
+            char.isupper() and 
+            (result[i-1].islower() or  # Lowercase to uppercase transition
+             (i > 1 and result[i-1].isupper() and result[i-2].islower()))):  # Special case for mixedCAMELCase
             chars.append(' ')
         chars.append(char)
     
