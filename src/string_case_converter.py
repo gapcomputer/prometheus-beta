@@ -35,9 +35,12 @@ def to_constant_case(input_string: str) -> str:
     # Replace existing separators with spaces
     result = input_string.replace('-', ' ').replace('_', ' ')
     
-    # Use regex to split camel case
-    # This handles various cases like camelCase, PascalCase, mixedCAMELCase
+    # Sophisticated camel case handling
+    # 1. Add space between lowercase and uppercase letters
     result = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', result)
+    
+    # 2. Handle consecutive uppercase letters
+    result = re.sub(r'([A-Z])([A-Z][a-z])', r'\1 \2', result)
     
     # Convert to uppercase and replace spaces with underscores
     result = result.upper().replace(' ', '_')
