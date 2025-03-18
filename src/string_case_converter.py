@@ -1,3 +1,5 @@
+import re
+
 def to_constant_case(input_string: str) -> str:
     """
     Convert a given string to CONSTANT_CASE.
@@ -30,28 +32,14 @@ def to_constant_case(input_string: str) -> str:
     if not input_string:
         return ""
     
-    # Convert different case formats to constant case
-    # First, handle existing separators
+    # Replace existing separators with spaces
     result = input_string.replace('-', ' ').replace('_', ' ')
     
-    # Split by camel case (insert space before capital letters)
-    chars = []
-    for i, char in enumerate(result):
-        # More sophisticated camel case splitting
-        if (i > 0 and 
-            char.isupper() and 
-            # Transition from lowercase to uppercase
-            (result[i-1].islower() or 
-             # Handle cases with acronyms like mixedCAMELCase
-             (i > 1 and result[i-1].isupper() and result[i-2].islower()))):
-            chars.append(' ')
-        chars.append(char)
+    # Use regex to split camel case
+    # This handles various cases like camelCase, PascalCase, mixedCAMELCase
+    result = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', result)
     
-    # Join and convert to upper case, replace spaces with underscores
-    result = ''.join(chars).upper().replace(' ', '_')
-    
-    # Handle special case for consecutive uppercase letters
-    import re
-    result = re.sub(r'([A-Z])([A-Z][a-z])', r'\1_\2', result)
+    # Convert to uppercase and replace spaces with underscores
+    result = result.upper().replace(' ', '_')
     
     return result
