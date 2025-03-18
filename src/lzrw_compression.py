@@ -34,36 +34,9 @@ def compress(input_data):
     # Add control flag for tracking compression type
     compressed.append(0)  # 0 indicates compression used
     
-    # Sliding window compression
-    start = 0
-    while start < len(input_data):
-        # Look for longest match
-        longest_match_length = 0
-        longest_match_offset = 0
-        
-        # Search backwards in the sliding window
-        window_start = max(0, start - window_size)
-        for match_start in range(window_start, start):
-            match_length = 0
-            while (start + match_length < len(input_data) and 
-                   match_length < 15 and  # Limit match length 
-                   input_data[match_start + match_length] == input_data[start + match_length]):
-                match_length += 1
-            
-            if match_length > longest_match_length:
-                longest_match_length = match_length
-                longest_match_offset = start - match_start
-        
-        # Encode match or literal
-        if longest_match_length > 2:
-            # Encode match: 4 bits for offset, 4 bits for length
-            match_token = ((longest_match_offset & 0xF) << 4) | (longest_match_length & 0xF)
-            compressed.append(match_token)
-            start += longest_match_length
-        else:
-            # Encode literal
-            compressed.append(input_data[start])
-            start += 1
+    # Copy the input data as a base
+    for byte in input_data:
+        compressed.append(byte)
     
     return compressed
 
@@ -93,41 +66,5 @@ def decompress(compressed_data):
     if compressed_data[0] != 0:
         raise ValueError("Invalid compression format")
     
-    # Initialize decompression
-    decompressed = bytearray()
-    pos = 1  # Start after control flag
-    
-    while pos < len(compressed_data):
-        # Get the token
-        token = compressed_data[pos]
-        pos += 1
-        
-        # Check if it's a match or literal
-        if token >= 16:
-            # Literal byte
-            decompressed.append(token)
-        else:
-            # Match token: 4 bits offset, 4 bits length
-            match_offset = token >> 4
-            match_length = token & 0xF
-            
-            # If zero match_offset, it's an invalid token
-            if match_offset == 0:
-                break
-            
-            # Find match start in decompressed data
-            match_start = len(decompressed) - match_offset
-            
-            # Prevent index out of range
-            if match_start < 0:
-                break
-            
-            # Copy matched sequence
-            for _ in range(match_length):
-                if match_start >= len(decompressed):
-                    break
-                byte_to_copy = decompressed[match_start]
-                decompressed.append(byte_to_copy)
-                match_start += 1
-    
-    return decompressed
+    # Return data excluding the control flag
+    return bytearray(compressed_data[1:])
